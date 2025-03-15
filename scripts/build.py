@@ -41,6 +41,37 @@ def export_html_wasm(notebook_path: str, output_dir: str, as_app: bool = False) 
 
         cmd.extend([notebook_path, "-o", output_file])
         subprocess.run(cmd, capture_output=True, text=True, check=True)
+        # Update HTML file title using YAML metadata
+        try:
+            with open("notebook_metadata.yml", "r") as f_meta:
+                config = yaml.safe_load(f_meta)
+                notebook_metadata = config.get("notebooks", {})
+            nb_key = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", Path(notebook_path).stem)
+            desired_title = notebook_metadata.get(nb_key, {}).get("title", nb_key.replace("_", " ").title())
+            with open(output_file, "r", encoding="utf-8") as f_html:
+                html_content = f_html.read()
+            new_title_tag = f"<title>{desired_title}</title>"
+            new_html_content = re.sub(r"<title>.*?</title>", new_title_tag, html_content)
+            # Insert an inline script before </body> to override any dynamic title changes using a MutationObserver
+            insert_index = new_html_content.rfind("</body>")
+            if insert_index != -1:
+                inline_script = (
+                    '<script>(function(){'
+                    f'var desiredTitle = "{desired_title}";'
+                    'function setTitle(){if(document.title !== desiredTitle){document.title = desiredTitle;}}'
+                    'setTitle();'
+                    'var observer = new MutationObserver(function(mutations){'
+                    'mutations.forEach(function(mutation){setTitle();});'
+                    '});'
+                    'var titleElement = document.querySelector("title");'
+                    'if(titleElement){observer.observe(titleElement, {childList:true});}'
+                    '})();</script>'
+                )
+                new_html_content = new_html_content[:insert_index] + inline_script + new_html_content[insert_index:]
+            with open(output_file, "w", encoding="utf-8") as f_html:
+                f_html.write(new_html_content)
+        except Exception as e:
+            print(f"Error updating title for {output_file}: {e}")
         return True
     except subprocess.CalledProcessError as e:
         print(f"Error exporting {notebook_path}:")
