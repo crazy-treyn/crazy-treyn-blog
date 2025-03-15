@@ -136,7 +136,8 @@ def generate_index(all_notebooks: List[str], output_dir: str) -> None:
             for notebook in all_notebooks:
                 nb_filename = Path(notebook).name.replace(".py", "")
                 # Remove a date prefix if present (e.g., 2025-03-15-)
-                key = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", nb_filename)
+                #key = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", nb_filename)
+                key = nb_filename
 
                 # Lookup metadata using the key
                 meta = notebook_metadata.get(key, {})

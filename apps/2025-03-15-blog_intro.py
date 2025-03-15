@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.10.9"
+__generated_with = "0.11.20"
 app = marimo.App(width="medium")
 
 
@@ -17,12 +17,11 @@ def _():
 def _(mo):
     mo.md(
         """
-        # Interactive Data Visualization
+        # Welcome to my blog!
 
-        <img src="public/logo.png" width="200" />
+        <img src="public/logo.png" width="150" align="center" />
 
-        This notebook demonstrates a simple interactive visualization using Altair.
-        Try selecting the points!
+        I am creating this blog to explore the possibilities with having a different type of blog, one that leverages reactive python notebooks with marimo, giving readers an immersive experience when learning about data analytics libraries.
         """
     )
     return
