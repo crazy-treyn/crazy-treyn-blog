@@ -1,0 +1,16 @@
+notebooks:
+  charts:
+    title: "Interactive Data Visualization"
+    description: "A deep dive into data visualization with Altair and marimo."
+    image: "apps/public/logo.png"
+    tags: ["visualization", "data", "altair"]
+  penguins:
+    title: "Palmer Penguins Analysis"
+    description: "Analyzing the Palmer Penguins dataset using Polars."
+    image: ""
+    tags: ["data analysis", "penguins", "polars"]
+  fibonacci:
+    title: "Fibonacci Calculator"
+    description: "An interactive Fibonacci sequence calculator built with marimo."
+    image: ""
+    tags: ["calculator", "fibonacci"]
