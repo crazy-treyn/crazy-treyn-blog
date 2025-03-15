@@ -9,8 +9,8 @@ import re
 import yaml  # For reading YAML config
 
 # Global settings for the blog. Update these manually as desired.
-BLOG_TITLE = "Crazy Treyn"  # Set the main blog title manually
-BLOG_SUBTITLE = "A Data Analytics blog."  # Set the subtitle manually
+BLOG_TITLE = "Crazy Treyn Blog"  # Set the main blog title manually
+BLOG_SUBTITLE = "A different kind of Data Analytics blog."  # Set the subtitle manually
 
 
 def export_html_wasm(notebook_path: str, output_dir: str, as_app: bool = False) -> bool:
