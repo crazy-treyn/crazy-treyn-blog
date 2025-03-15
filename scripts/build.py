@@ -54,7 +54,7 @@ def export_html_wasm(notebook_path: str, output_dir: str, as_app: bool = False) 
 def generate_index(all_notebooks: List[str], output_dir: str) -> None:
     """
     Generate the index.html file with sorted notebooks in descending order.
-    Applies a black background, white text, and a lighter subheading color to match the desired style.
+    Applies a dark theme to match the desired style.
     The blog title and subtitle are set manually via global constants.
     Additionally, ensures the image is left aligned next to the title/description and limits card widths.
     """
@@ -89,14 +89,14 @@ def generate_index(all_notebooks: List[str], output_dir: str) -> None:
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>""" + BLOG_TITLE + """</title>
     <!-- Tailwind CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body class="bg-black text-white font-sans p-8">
+  <body class="bg-[#282c34] text-[#abb2bf] font-sans p-8">
     <div class="max-w-4xl mx-auto">
       <div class="mb-8 text-center">
         <!-- Manually set blog title and subtitle -->
-        <h1 class="text-3xl font-bold mb-2">""" + BLOG_TITLE + """</h1>
-        <p class="text-gray-400">""" + BLOG_SUBTITLE + """</p>
+        <h1 class="text-3xl font-bold mb-2 text-[#abb2bf]">""" + BLOG_TITLE + """</h1>
+        <p class="text-[#5c6370]">""" + BLOG_SUBTITLE + """</p>
       </div>
       <div class="grid gap-4 grid-cols-1">\n"""
             )
@@ -116,7 +116,7 @@ def generate_index(all_notebooks: List[str], output_dir: str) -> None:
                 # Begin card container with limited width
                 f.write(
                     f'      <a href="{notebook.replace(".py", ".html")}" '
-                    'class="block w-full p-6 border border-gray-700 rounded transition duration-200 hover:bg-gray-800 max-w-xl mx-auto">\n'
+                    'class="block w-full p-6 border border-[#5c6370] rounded transition duration-200 hover:bg-[#3E4451] max-w-xl mx-auto">\n'
                 )
 
                 # Create a flex container so the image is on the right side
@@ -124,9 +124,9 @@ def generate_index(all_notebooks: List[str], output_dir: str) -> None:
 
                 # Title + description on the left
                 f.write('          <div>\n')
-                f.write(f'            <h3 class="text-2xl font-semibold mb-2">{title}</h3>\n')
+                f.write(f'            <h3 class="text-2xl font-semibold mb-2 text-[#61afef]">{title}</h3>\n')
                 if description:
-                    f.write(f'            <p class="text-gray-300">{description}</p>\n')
+                    f.write(f'            <p class="text-[#abb2bf]">{description}</p>\n')
                 f.write('          </div>\n')
 
                 # Image on the right
