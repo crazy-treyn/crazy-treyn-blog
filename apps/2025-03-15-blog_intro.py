@@ -12,8 +12,11 @@ def _():
     import marimo as mo
     import polars as pl
 
-    mo.sql("INSTALL httpfs;", output=False)
-    mo.sql("LOAD httpfs;", output=False)
+    try:
+        mo.sql("INSTALL httpfs;", output=False)
+        mo.sql("LOAD httpfs;", output=False)
+    except:
+        print("httpfs extention already loaded, continue..")
     return alt, mo, np, pd, pl
 
 
@@ -145,7 +148,7 @@ def _(mo, query):
 
 @app.cell
 def _(editor, mo, submit_query_btn, total_rows):
-    mo.stop(not submit_query_btn.value)
+    mo.stop(not submit_query_btn.value, mo.md("Run the query to continue.."))
 
     result = mo.sql(editor.value)
 
