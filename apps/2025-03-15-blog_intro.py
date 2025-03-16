@@ -10,9 +10,11 @@ def _():
     import altair as alt
     import pandas as pd
     import marimo as mo
-    import duckdb
     import polars as pl
-    return alt, duckdb, mo, np, pd, pl
+
+    mo.sql("INSTALL httpfs;", output=False)
+    mo.sql("LOAD httpfs;", output=False)
+    return alt, mo, np, pd, pl
 
 
 @app.cell
@@ -59,11 +61,11 @@ def _(alt, mo, np, pd):
 
 
 @app.cell
-def _(chart, duckdb, mo):
+def _(chart, df, mo):
     # View the chart and selected data as a dataframe
     df = chart.value
 
-    average_y = duckdb.query("SELECT AVG(Y) FROM df").fetchone()[0]
+    average_y = mo.sql("SELECT AVG(Y) FROM df")[0,0]
 
     if average_y is None:
         avg_title = mo.md(f"###Select data points to show average")
@@ -81,6 +83,8 @@ def _(mo):
         ## Example 2
 
         We can process millions of rows of public available data and aggregate and plot the results, all running locally in the browser with DuckDB. Although this Marimo notebook is read-only, I can give you a code editor to allow you to pass in your own SQL queries and see the resulting dataframe.
+
+        First, we will create a table in memory with DuckDB based on [NYC Taxi Trip data.](https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet)
         """
     )
     return
@@ -146,7 +150,7 @@ def _(editor, mo, submit_query_btn, total_rows):
     result = mo.sql(editor.value)
 
     # Display the result (as a Pandas DataFrame)
-    title = mo.md(f"Total rows in the parquet file: {total_rows:,}")
+    title = mo.md(f"Total rows in the DuckDB table: {total_rows:,}")
 
     mo.vstack([title, result])
     return result, title
