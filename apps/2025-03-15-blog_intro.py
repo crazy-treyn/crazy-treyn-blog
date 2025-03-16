@@ -11,7 +11,9 @@ def _():
     import pandas as pd
     import marimo as mo
     import polars as pl
-    return alt, mo, np, pd, pl
+    import pyarrow.parquet as pq
+    import duckdb
+    return alt, duckdb, mo, np, pd, pl, pq
 
 
 @app.cell
@@ -88,17 +90,19 @@ def _(mo):
 
 
 @app.cell
-def _(mo, null):
+def _(duckdb, mo, pq, tbl):
     #parquet_file_relative = "public/yellow_tripdata_2023-01.parquet"
     #parquet_file_full = "apps/public/yellow_tripdata_2023-01.parquet"
 
     path = mo.notebook_location() / "public" / "yellow_tripdata_2023-01.parquet"
 
-    print(path)
+    arrow_tbl = pq.read_table(path)
+
+    duckdb.register("tbl", arrow_tbl)
 
     # Register the Parquet file as a table
-    mo.sql(f"CREATE OR REPLACE TABLE taxi_trips AS SELECT * FROM '{path}'")
-    return path, taxi_trips
+    mo.sql(f"CREATE OR REPLACE VIEW taxi_trips AS SELECT * FROM tbl", )
+    return arrow_tbl, path, taxi_trips
 
 
 @app.cell
