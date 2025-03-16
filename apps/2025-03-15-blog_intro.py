@@ -89,17 +89,16 @@ def _(mo):
 
 @app.cell
 def _(mo, null):
-    parquet_file_relative = "public/yellow_tripdata_2023-01.parquet"
-    parquet_file_full = "apps/public/yellow_tripdata_2023-01.parquet"
+    #parquet_file_relative = "public/yellow_tripdata_2023-01.parquet"
+    #parquet_file_full = "apps/public/yellow_tripdata_2023-01.parquet"
 
+    path = mo.notebook_location() / "public" / "yellow_tripdata_2023-01.parquet"
+
+    print(path)
 
     # Register the Parquet file as a table
-    try:
-        mo.sql(f"CREATE OR REPLACE TABLE taxi_trips AS SELECT * FROM '{parquet_file_relative}'")
-    except:
-        mo.sql(f"CREATE OR REPLACE TABLE taxi_trips AS SELECT * FROM '{parquet_file_full}'")
-
-    return parquet_file_full, parquet_file_relative, taxi_trips
+    mo.sql(f"CREATE OR REPLACE TABLE taxi_trips AS SELECT * FROM '{path}'")
+    return path, taxi_trips
 
 
 @app.cell
@@ -153,7 +152,7 @@ def _(editor, mo, submit_query_btn, total_rows):
     result = mo.sql(editor.value)
 
     # Display the result (as a Pandas DataFrame)
-    title = mo.md(f"Total rows in the DuckDB table: {total_rows:,}")
+    title = mo.md(f"Total rows in the polars dataframe: {total_rows:,}")
 
     mo.vstack([title, result])
     return result, title
