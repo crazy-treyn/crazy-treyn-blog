@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.11.20"
-app = marimo.App(width="medium")
+app = marimo.App()
 
 
 @app.cell
@@ -10,7 +10,9 @@ def _():
     import altair as alt
     import pandas as pd
     import marimo as mo
-    return alt, mo, np, pd
+    import duckdb
+    import polars as pl
+    return alt, duckdb, mo, np, pd, pl
 
 
 @app.cell
@@ -21,7 +23,19 @@ def _(mo):
 
         <img src="public/logo.png" width="150" align="center" />
 
-        I am creating this blog to explore the possibilities with having a different type of blog, one that leverages reactive python notebooks with marimo, giving readers an immersive experience when learning about data analytics libraries.
+        I’m launching this blog to explore how reactive, Python-focused Marimo notebooks can be used as blog posts, turning each blog post into its own interactive app. This opens up the possibility of creating an engaging experience where readers can interact directly with live code running right in their browser, especially when
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Example 1:
+
+        You can click and drag to highlight data points from the below chart, and you will see that the dataframe below as well as the Markdown above the chart, showing the Y value average based on your selection.
         """
     )
     return
@@ -41,14 +55,101 @@ def _(alt, mo, np, pd):
             .properties(height=400, title="Interactive Scatter Plot")
         )
     )
-    chart
     return chart, data
 
 
 @app.cell
-def _(chart):
-    chart.value
+def _(chart, duckdb, mo):
+    # View the chart and selected data as a dataframe
+    df = chart.value
+
+    average_y = duckdb.query("SELECT AVG(Y) FROM df").fetchone()[0]
+
+    if average_y is None:
+        avg_title = mo.md(f"###Select data points to show average")
+    else:
+        avg_title = mo.md(f"###The average Y value is: **{average_y}**")
+
+    mo.vstack([avg_title, chart, df])
+    return average_y, avg_title, df
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## Example 2
+
+        We can process millions of rows of public available data and aggregate and plot the results, all running locally in the browser with DuckDB. Although this Marimo notebook is read-only, I can give you a code editor to allow you to pass in your own SQL queries and see the resulting dataframe.
+        """
+    )
     return
+
+
+@app.cell
+def _(mo, null):
+    parquet_file = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet"
+
+    # Register the Parquet file as a table
+    mo.sql(f"CREATE OR REPLACE TABLE taxi_trips AS SELECT * FROM '{parquet_file}'")
+    return parquet_file, taxi_trips
+
+
+@app.cell
+def _(mo, taxi_trips):
+    total_rows = mo.sql("SELECT COUNT(1) as TaxiRowCount FROM taxi_trips", output=False)[0,0]
+
+    # Example query: Count trips by passenger count
+    query = """
+        SELECT passenger_count, COUNT(*) as trip_count
+        FROM taxi_trips
+        GROUP BY passenger_count
+        ORDER BY passenger_count
+    """
+    _schema = mo.sql('DESCRIBE taxi_trips', output=False)
+
+    # Select only the two necessary columns and convert to a dictionary
+    dict_values = dict(zip(_schema["column_name"], _schema["column_type"]))
+
+
+    # Generate Markdown string
+    markdown_str = "### List of Available Fields to Query\n\n"
+    markdown_str += "| Field | Value |\n|---|---|\n"
+
+    # Append key-value pairs as Markdown table rows
+    for key, value in dict_values.items():
+        markdown_str += f"| {key} | {value} |\n"
+
+    # Print the Markdown output
+    mo.md(markdown_str)
+    return dict_values, key, markdown_str, query, total_rows, value
+
+
+@app.cell
+def _(mo, query):
+    editor = mo.ui.code_editor(
+        value=query,
+        language="sql"
+    )
+    editor
+
+    submit_query_btn = mo.ui.run_button(label="Run Query")
+
+    mo.vstack([mo.md("Specify a query to run and click 'Run Query'"), editor, submit_query_btn])
+    return editor, submit_query_btn
+
+
+@app.cell
+def _(editor, mo, submit_query_btn, total_rows):
+    mo.stop(not submit_query_btn.value)
+
+    result = mo.sql(editor.value)
+
+    # Display the result (as a Pandas DataFrame)
+    title = mo.md(f"Total rows in the parquet file: {total_rows:,}")
+
+    mo.vstack([title, result])
+    return result, title
 
 
 if __name__ == "__main__":
