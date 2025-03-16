@@ -13,10 +13,11 @@ def _():
     import polars as pl
 
     try:
-        mo.sql("INSTALL httpfs;", output=False)
-        mo.sql("LOAD httpfs;", output=False)
+        mo.sql("SET autoinstall_known_extensions=1;", output=False)
+        mo.sql("SET autoload_known_extensions=1;", output=False)
     except:
-        print("httpfs extention already loaded, continue..")
+        print("Error setting autoload/install known extensions for DuckDB.")
+
     return alt, mo, np, pd, pl
 
 
@@ -96,6 +97,13 @@ def _(mo):
 @app.cell
 def _(mo, null):
     parquet_file = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet"
+
+
+    try:
+        mo.sql("INSTALL httpfs;", output=False)
+        mo.sql("LOAD httpfs;", output=False)
+    except:
+        print("httpfs extention already loaded, continue..")
 
     # Register the Parquet file as a table
     mo.sql(f"CREATE OR REPLACE TABLE taxi_trips AS SELECT * FROM '{parquet_file}'")
